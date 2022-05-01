@@ -123,7 +123,69 @@ set tx_isolation=’隔离级别名称;’
 
   ​		对于使用MySQL命令窗口而言，一个窗口就相当于一个链接，当前窗口设置的隔离级别只对当前窗口中的事务有效；对于JDBC操作数据库来说，一个Connection对象相当于一个链接，而对于Connection对象设置的隔离级别只对该Connection对象有效，与其他链接Connection对象无关。
 
+## 三、MySQL锁
 
+MySQL的并发控制时在数据安全性和并发处理能力之间的权衡，通过不同的锁策略来决定系统开销和性能的影响，MySQL通过MVCC和锁来处理。
+
+### 1. 锁的粒度
+
+```sql
+/** Lock types */
+#define LOCK_TABLE 16  /*!< table lock */
+#define LOCK_REC 32    /*!< record lock */
+```
+
+- 表锁
+
+表锁由MySQL Server控制，优点是开销小、加锁快，不会产生死锁，缺点是加锁力度大，发生锁冲突的概率大，并发度比较低。
+
+**一般DDL语句会自动加表锁，也可以手动指定**，表锁分为读锁和写锁
+
+```sql
+//加读锁
+lock table products read;
+//加写锁
+lock table products write;
+```
+
+当对表加了**读锁**，则**该**会话只能**读取当前被加锁的表**，**其它会话**仍然可以对**表进行读取但不能写入**。
+
+当对表加了**写锁**，则**该**会话可以**读取或写入被加锁的表**，其它会话**不能对加锁的表进行读取或写入**。
+
+- 行锁
+
+行锁由存储引擎实现，InnoDB 支持，而 MyISAM 不支持。行锁的优点是锁粒度小，发生锁冲突概率小，并发度高，缺点是开销大、加锁慢，并且可能产生死锁。
+
+InnoDB 行锁是通过**索引项加锁来实现的，只有通过索引条件检索数据**，才能锁住指定的索引记录，否则将使用行锁锁住全部数据（有文章称会退化为表锁，是错误的理解）。
+
+表级锁适合**查询多、更新少**的场景，行级锁适合按索引**更新频率高**的场景。InnoDB 默认使用行级锁。
+
+### 2. 锁模式 Lock Mode
+
+MySQL源码中定义了多种锁的模式，如下：
+
+```sql
+/* Basic lock modes */
+enum lock_mode {
+  LOCK_IS = 0,          /* intention shared */
+  LOCK_IX,              /* intention exclusive */
+  LOCK_S,               /* shared */
+  LOCK_X,               /* exclusive */
+  LOCK_AUTO_INC,        /* locks the auto-inc counter of a table in an exclusive mode */
+ ...
+};
+```
+
+- 共享锁和排它锁
+
+  **共享锁和排他锁都是行级锁**
+
+  -  **Shared Lock(S锁)**：共享锁，也成为读锁。当事务对行加共享锁后，允许其他事务向相同行加共享锁，但不允许加排他锁。
+  - **Exclusive Lock (X 锁)**:排它锁，也称为写锁。当事务对行加排它锁后，不允许其它事务对相同行加共享锁或排它锁。
+
+- 意向锁
+
+  
 
 
 
