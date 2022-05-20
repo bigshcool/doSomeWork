@@ -135,49 +135,49 @@ yum makecache fast
 
 ### 3.1 帮助启动类命令
 
-启动Docker
+**启动Docker**
 
 ```shell
 systemctl start docker
 ```
 
-停止Docker
+**停止Docker**
 
 ```shell
 systemctl stop docker
 ```
 
-重启Docker
+**重启Docker**
 
 ```shell
 systemctl restart docker
 ```
 
-查看Docker状态
+**查看Docker状态**
 
 ```shell
 systemctl status docker
 ```
 
-开机启动:
+**开机启动**
 
 ```shell
 systemctl enable docker
 ```
 
-查看Docker信息
+**查看Docker信息**
 
 ```shell
 docker info
 ```
 
-查看Docker总体帮助文档
+**查看Docker总体帮助文档**
 
 ```shell
 docker--help
 ```
 
-查看docker命令帮助文档:
+**查看docker命令帮助文档**
 
 ```shell
 docker 具体命令 --help
@@ -185,7 +185,86 @@ docker 具体命令 --help
 
 ### 3.2 镜像命令
 
+**罗列本地存有的所有镜像**
+
+```
+docker images
+
+OPTIONS说明
+-a 列出本地所有镜像（含历史镜像）
+-q 只显示镜像ID
+```
+
+![image](https://cdn.jsdelivr.net/gh/bigshcool/myPic@main/image.5za7slj9ze40.jpg)
+
+REPOSITORY:表示镜像的仓库源
+
+TAG:镜像标签版本号
+
+IMAGE_ID:镜像ID
+
+CREATED:镜像创建时间
+
+SIZE:镜像大小
+
+同一仓库源可以有多个版本号，代表仓库源的不同版本，我们使用REPOSITORY:TAG来定义不同的镜像。
+
+如果你不指定一个镜像的版本标签，例如你只是用ubuntu，docker将默认使用ubuntu:latest镜像。
+
+
+
+**查询镜像**
+
+```shell
+Docker search 镜像名
+
+OPTIONS说明
+--limit 5 只列出5个 不填写数字 默认25个
+```
+
+
+
+**下载某个镜像**
+
+```dockerfile
+docker pull 镜像名[:TAG]
+没有TAG的话就是表示最新的版本的镜像
+```
+
+
+
+**查看镜像/容器/数据卷所占用的空间**
+
+```
+docker system df 
+```
+
+
+
+**删除镜像**
+
+```
+docker rmi IMAGES_ID(镜像ID)
+
+OPTIONS说明
+-f 强制删除
+```
+
+
+
+- **虚悬镜像是什么？**
+
+  指的是**仓库名、标签**都是none的镜像，所称虚悬镜像，建议删除
+
 ### 3.3 容器命令
+
+
+
+
+
+
+
+
 
 
 
