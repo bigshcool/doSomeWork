@@ -23,6 +23,16 @@
 
 **Docker容器是在操作系统层面实现虚拟化，直接复用本地主机的操作系统，而传统虚拟机则是在硬件层面实现虚拟化。与传统的虚拟机想比，Docker优势体现为启动速度快，占用体积小，同时每个容器之间相互隔离，每个容器都有自己的文件系统，容器之间进程不会相互影响，能区分计算资源。**
 
+- **Docker会比VM快的原因**
+
+  - Docker有着比虚拟机更少的抽象层
+
+    由于docker不需要像虚拟机一样实现硬件资源的虚拟化，运行在docker容器上的程序直接使用的都是实际的硬件资源，因此在CPU、内存利用率上docker将会在效率上有明显的提升。
+
+  - Docker利用的时宿主机的内核，而不需要加载操作系统的内核。
+
+    当新键一个容器时，docker不需要和虚拟机一样重新加载一个操作系统内核。进而避免寻址、加载操作系统内核返回等比较费时间费资源的过程，当新键一个虚拟机时，虚拟机软件需要加载OS，返回新建的过程是分钟级的。而Docker由于直接利用宿主机的操作系统，则省略了返回过程，因此新键一个docker容器只需要几秒钟。
+
 ## 2. Docker安装
 
 Docker官网：http://www.docker.com
@@ -76,6 +86,48 @@ cat /etc/redhat -release
 
   仓库分为公开仓库(Public)和私有仓库(Private)两种形式
 
-  最大的公开仓库是Docker Hub(https://hub.docker.com/)，存放了数量庞大的镜像提供用户下载。
+  最大的公开仓库是Docker Hub(https://hub.docker.com)，存放了数量庞大的镜像提供用户下载。
 
-  
+### 2.3 Docker基本流程
+
+**Docker是一个C/S模式的架构，后端是一个松耦合，众多模块各司其职**
+
+1. 用户是使用Docker Client和Docker Daemon建立通信，并发送请求给后端
+2. Docker Daemon作为Docker架构中的主体部分，首先提供Docker Server的功能使它可以接受Docker Client的请求
+3. Docker Engine作为执行Docker内部的一系列工作，每一项工作都是以一个Job的形式存在的。
+4. Job运行过程中，当需要容器镜像时，则从Docker Registry下载镜像，并通过镜像管理驱动Graph driver将下载镜像以Graph形式存储。
+5. 当需要为Docker创建网络环境时，通过网络管理驱动Network driver创建并且配置Docker容器网络环境
+6. 当需要限制Docker容器运行资源或执行用户指令操作时，则需要通过Exec driver来完成
+7. Libcontainer是一项独立的容器管理包，Network driver以及Exec driver都是通过Libcontainer来实现具体对容器进行的操作。
+
+### 2.4 安装步骤
+
+1. 首先安装gcc环境
+
+```shell
+yum -y install gcc
+yum -y install gcc-c++
+yum install -y yum-utils
+```
+
+2. [Centos7以上版本安装方法官网]([Install Docker Engine on CentOS | Docker Documentation](https://docs.docker.com/engine/install/centos/))
+
+```shell
+注意:在安装stable repository时需要将网址换成国内的镜像，不然老会爆出超时的错误
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+然后更新一下yum软件的包的索引,将软件包信息提前在本地缓存一份，用来提高搜索安装软件的速度
+yum makecache fast
+```
+
+3. 镜像加速器
+
+   - 首先需要注册阿里云（地址：https://www.aliyun.com/）账号，已有账号的登录后，在阿里云控制台找到容器镜像服务。
+
+     ![阿里云镜像加速](https://cdn.jsdelivr.net/gh/bigshcool/myPic@main/阿里云镜像加速.5n73qvs7mjo0.jpg)
+
+   - 按照操作文档进行操作
+
+     ![镜像加速操作文档](https://cdn.jsdelivr.net/gh/bigshcool/myPic@main/镜像加速操作文档.2u0mi7vp9dg0.jpg)
+
+   
