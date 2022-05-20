@@ -130,4 +130,62 @@ yum makecache fast
 
      ![镜像加速操作文档](https://cdn.jsdelivr.net/gh/bigshcool/myPic@main/镜像加速操作文档.2u0mi7vp9dg0.jpg)
 
-   
+
+## 3. Docker常用命令
+
+### 3.1 帮助启动类命令
+
+启动Docker
+
+```shell
+systemctl start docker
+```
+
+停止Docker
+
+```shell
+systemctl stop docker
+```
+
+重启Docker
+
+```shell
+systemctl restart docker
+```
+
+查看Docker状态
+
+```shell
+systemctl status docker
+```
+
+开机启动:
+
+```shell
+systemctl enable docker
+```
+
+查看Docker信息
+
+```shell
+docker info
+```
+
+查看Docker总体帮助文档
+
+```shell
+docker--help
+```
+
+查看docker命令帮助文档:
+
+```shell
+docker 具体命令 --help
+```
+
+### 3.2 镜像命令
+
+### 3.3 容器命令
+
+
+
