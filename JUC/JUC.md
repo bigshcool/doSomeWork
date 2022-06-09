@@ -47,8 +47,6 @@
   - 用户线程:自定义线程， **如果主线程死去，用户线程还存活，jvm不会死去**
   - 守护线程：运行在后台的线程，比如说垃圾回收，**如果主线程死去，没有用户线程了，都是守护线程，jvm就会结束了**
 
-111
-
 
 ## 2.Lock接口
 
@@ -75,7 +73,6 @@
       public synchronized void sale(){
           if(num > 0){
               System.out.println(Thread.currentThread().getName()+"----剩下"+--num);
-  
           }
       }
   }
@@ -119,5 +116,4 @@
   }
   
   ```
-
   
