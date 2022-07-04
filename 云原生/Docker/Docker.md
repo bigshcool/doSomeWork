@@ -410,7 +410,7 @@ cat abcd.tar | docker import - al/ubuntu:3.7
 
 - Docker镜像加载原理
 
-  docker的镜像实际由一层一层的文件系统组成，这种层级的文件系统UnionFS。bootFS主要包含bootloader和kernel，bootloader主要引导加载kernel，linux刚启动时回家再bootfs文件系统，在Docker镜像最底层时引导文件系统bootfs。这一层与我们典型的Linux/Unix系统是一样得，包含boot加载器和内核。当boot加载完成以后整个内核都在内存中了，此时内存的使用权由bootfs转交给内核，此时系统也会卸载bootfs。
+  docker的镜像实际由一层一层的文件系统组成，这种层级的文件系统UnionFS。bootFS主要包含bootloader和kernel，bootloader主要引导加载kernel，linux刚启动时会加载bootfs文件系统，在Docker镜像最底层时引导文件系统bootfs。这一层与我们典型的Linux/Unix系统是一样得，包含boot加载器和内核。当boot加载完成以后整个内核都在内存中了，此时内存的使用权由bootfs转交给内核，此时系统也会卸载bootfs。
 
   rootfs在bootfs之上。包含的就是典型Linux系统中的/dev,/proc,/etc等标准目录和文件。rootfs就是各种不同的操作系统的发行版本，如Ubuntu、centos等等。
 
@@ -427,4 +427,38 @@ cat abcd.tar | docker import - al/ubuntu:3.7
   当容器启动时，一个新的可写层被加载到镜像的顶部。
 
   这一层通常被称作“容器层”，“容器层”已下都被成为镜像层。
+
+## 5.容器数据卷
+
+Docker 挂载主机目录访问如果出现**cannot open directory::Permission denied**
+
+解决办法：再挂载目录吼多加一个**--privileged=true**参数即可
+
+使用该参数，那么container内的root拥有真正的root权限，否则，container内的root只是外部的一个普通用户权限。
+
+```
+docker run -it --privileged=true -v /宿主机角度路径目录:/容器内目录 镜像名
+```
+
+**容器卷之间的继承**
+
+```
+docker run -it --privileged=true --volumes from 父类 --name u2 ubuntu
+```
+
+## 6.部分实操
+
+- 下载tomcat8
+
+```
+docker run -d -p 8080:8080 --name mytomcat8 billygoo/tomcat8-jdk8
+```
+
+- 下载mysql5.7
+
+```
+docker run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
+```
+
+
 
