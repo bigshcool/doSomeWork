@@ -457,8 +457,21 @@ docker run -d -p 8080:8080 --name mytomcat8 billygoo/tomcat8-jdk8
 - 下载mysql5.7
 
 ```
-docker run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
+/*简单版*/
+docker run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7 
 ```
 
+- 实现mysql数据挂载（将容器删除了以后，还能恢复）
 
+```
+docker run -d -p 3306:3306 --privileged=true -v  /home/ubuntu/mysql/log:/var/log/mysql -v /home/ubuntu/mysql/data:/var/lib/mysql -v /home/ubuntu/mysql/conf:/etc/mysql/con.d -e MYSQL_ROOT_PASSWORD=123456 --name mysql mysql:5.7
+```
+
+**在docker安装完成Mysql并run出容器后，建议先修改完字符集后再创建mysql库，表-插数据**
+
+- 下载redis:6.0.8
+
+```
+docker run -d -p 6379:6379 redis:6.0.8
+```
 
