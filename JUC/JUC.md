@@ -114,6 +114,332 @@
           },"CC").start();
       }
   }
-  
   ```
   
+
+### 2.2 Lock初认识
+
+Lock锁实现提供了比使用同步方法和语句可以获得更为广泛的锁操作。它们允许更灵活的结构，可能具有非常不同的属性，并且可能支持多个关联条件对想。Lock'提供了比synchronized更多的功能。
+
+- Lock不是java语言内置的，synchronized是java语言的关键字，因此是内置特性。Lock是一个类，通过这个类可以实现同步访问。
+- Lock和synchronized有一点非常大的不同，采用synchronized不需要用户去手动释放锁，当synchronized方法或者synchronized代码块执行完了以后，系统会自动让线程始放对锁的占用；而Lock必须用户去手动释放锁，如果没有主动释放锁，就有可能导致死锁的现象。**于是，可以知道synchronized在发生异常时，会自动释放线程占有的锁，因此不会导致死锁现象的发生；而Lock在发生异常时，如果没有主动通过unLock()去释放锁，则很可能导致死锁，则需要在finally代码块中释放锁**
+- Lock可以让等待锁的线程中断，而synchronized却不行，使用synchronized时，等待的线程会一直等待下去，不能够响应中断。
+- 通过Lock可以知道有没有成功获取锁，而synchronize却无法知道。
+- Lock可以提高多个线程进行读的操作的效率。**如果竞争的不激烈，两者的性能差不多的，而当竞争资源非常激烈时，Lock的性能要远远优于synchronized**
+
+- 实操
+
+```
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+class LTicket{
+    //票的数量
+    int number = 30;
+    //可重用锁
+    private final Lock lock = new ReentrantLock();
+    //卖票的方法
+    public void sale(){
+        //上锁
+        lock.lock();
+        try {
+            if (number > 0){
+                System.out.println(Thread.currentThread().getName()+"：剩余"+--number);
+            }
+        }catch (Exception e){
+            System.out.println("我错了");
+        }finally {
+            //解锁
+            lock.unlock();
+        }
+
+    }
+}
+
+public class LSaleTicket {
+    //第二步 创建多个线程 调用资源类的操作方法
+    public static void main(String[] args) {
+        long start = System.currentTimeMillis();
+        System.out.println(start);
+        LTicket ticket = new LTicket();
+        new Thread(()->{
+            for (int i = 0; i < 40 ;i++){
+                ticket.sale();
+            }
+        },"AA").start(); //再调用start之前，线程不一定马上创建。
+
+        new Thread(()->{
+            for (int i = 0; i < 40 ;i++){
+                ticket.sale();
+            }
+        },"BB").start();
+
+        new Thread(()->{
+            for (int i = 0; i < 40 ;i++){
+                ticket.sale();
+            }
+        },"CC").start();
+    }
+}
+```
+
+### 2.3 线程间的通信
+
+#### 2.3.1wait方法和notifyAll简单实现
+
+通过object类的wait方法和notifyAll完成线程的相互通知，按照以下思路。
+
+1. 编写资源类定义、资源方法
+2. 在资源方法中完成 判断，干活，通知
+3. 创建线程调用资源类的方法。
+
+```
+//第一步 创建资源类 定义属性和方法
+class Share{
+    //初始值
+    private int number = 0;
+    //+1方法
+    public synchronized void incr() throws InterruptedException {
+        // 第二步 判断 干活 通知
+        if(number != 0){ //判断number值是否为0，如果不是0，则等待
+            this.wait();
+        }
+        // 如果number是0，就+1操作
+        number++;
+        System.out.println(Thread.currentThread().getName()+"::"+number);
+        //通知其他线程
+        this.notifyAll();
+    }
+    //-1方法
+    public synchronized void decr() throws InterruptedException {
+        if(number != 1){
+            this.wait();
+        }
+        //干活
+        number--;
+        System.out.println(Thread.currentThread().getName()+"::"+number);
+        //通知其他线程
+        this.notifyAll();
+    }
+}
+
+public class ThreadDemo1 {
+    //创建多个线程,调用资源类的操作方法
+    public static void main(String[] args) {
+        Share share = new Share();
+        //创建线程
+        new Thread(()->{
+            for (int i = 1;i <= 10;i++){
+                try {
+                    share.incr();
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        },"AAA").start();
+        //创建线程
+        new Thread(()->{
+            for (int i = 1;i <= 10;i++){
+                try {
+                    share.decr();
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        },"BBB").start();
+    }
+}
+```
+
+#### 2.3.2 虚假唤醒问题
+
+**如果像上述代码一个生产者 一个消费者进行线程切换，是会输出1，0，1，0的，但是如果有，为了避免虚假唤醒应该将资源方法的if改写成while，虚假唤醒的原因是wait会哪里等待，哪里被唤醒**
+
+```
+package sellTicket.lock;
+
+//第一步 创建资源类 定义属性和方法
+class Share{
+    //初始值
+    private int number = 0;
+    //+1方法
+    public synchronized void incr() throws InterruptedException {
+        // 第二步 判断 干活 通知
+        while(number != 0){ //判断number值是否为0，如果不是0，则等待
+            this.wait();
+        }
+        // 如果number是0，就+1操作
+        number++;
+        System.out.println(Thread.currentThread().getName()+"::"+number);
+        //通知其他线程
+        this.notifyAll();
+    }
+    //-1方法
+    public synchronized void decr() throws InterruptedException {
+        while (number != 1){
+            this.wait();
+        }
+        //干活
+        number--;
+        System.out.println(Thread.currentThread().getName()+"::"+number);
+        //通知其他线程
+        this.notifyAll();
+    }
+}
+
+public class ThreadDemo1 {
+    //创建多个线程,调用资源类的操作方法
+    public static void main(String[] args) {
+        Share share = new Share();
+        //创建线程
+        new Thread(()->{
+            for (int i = 1;i <= 10;i++){
+                try {
+                    share.incr();
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        },"AAA").start();
+
+        //创建线程
+        new Thread(()->{
+            for (int i = 1;i <= 10;i++){
+                try {
+                    share.decr();
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        },"BBB").start();
+
+        //创建线程
+        new Thread(()->{
+            for (int i = 1;i <= 10;i++){
+                try {
+                    share.decr();
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        },"CCC").start();
+
+        //创建线程
+        new Thread(()->{
+            for (int i = 1;i <= 10;i++){
+                try {
+                    share.decr();
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        },"DDD").start();
+    }
+}
+```
+
+#### 2.3.3 Lock实现进程间通信
+
+```
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+class Share{
+    private int number =0;
+
+    //创建Lock
+    private Lock lock = new ReentrantLock();
+    private Condition condition = lock.newCondition();
+
+    //+1
+    public void incr() throws InterruptedException{
+        //上锁
+        lock.lock();
+        try {
+            //判断
+            while (number != 0){
+                condition.await();
+            }
+            //干活
+            number++;
+            System.out.println(Thread.currentThread().getName()+"::"+number);
+            //通知
+            condition.signalAll();
+        }finally {
+            //解锁
+            lock.unlock();
+        }
+    }
+
+    public void decr() throws InterruptedException{
+        lock.lock();
+        try {
+            //判断
+            while (number != 1){
+                condition.await();
+            }
+            //操作
+            number--;
+            System.out.println(Thread.currentThread().getName()+"::"+number);
+            //通知
+            condition.signalAll();
+        }finally {
+            //解锁
+            lock.unlock();
+        }
+    }
+}
+
+public class ThreadDemo2 {
+    public static void main(String[] args) {
+        Share share = new Share();
+        new Thread(()->{
+            for (int i = 0;i <= 10 ;i++){
+                try {
+                    share.incr();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        },"AAA").start();
+
+        new Thread(()->{
+            for (int i = 0;i <= 10 ;i++){
+                try {
+                    share.decr();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        },"BBB").start();
+
+        new Thread(()->{
+            for (int i = 0;i <= 10 ;i++){
+                try {
+                    share.decr();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        },"CCC").start();
+
+        new Thread(()->{
+            for (int i = 0;i <= 10 ;i++){
+                try {
+                    share.decr();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        },"DDD").start();
+    }
+}
+```
+
+
+
+
+
+
+
