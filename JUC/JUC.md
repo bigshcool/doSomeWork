@@ -129,7 +129,7 @@ Lock锁实现提供了比使用同步方法和语句可以获得更为广泛的�
 
 - 实操
 
-```
+```java
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -193,7 +193,7 @@ public class LSaleTicket {
 2. 在资源方法中完成 判断，干活，通知
 3. 创建线程调用资源类的方法。
 
-```
+```java
 //第一步 创建资源类 定义属性和方法
 class Share{
     //初始值
@@ -255,7 +255,7 @@ public class ThreadDemo1 {
 
 **如果像上述代码一个生产者 一个消费者进行线程切换，是会输出1，0，1，0的，但是如果有，为了避免虚假唤醒应该将资源方法的if改写成while，虚假唤醒的原因是wait会哪里等待，哪里被唤醒**
 
-```
+```java
 package sellTicket.lock;
 
 //第一步 创建资源类 定义属性和方法
@@ -340,7 +340,7 @@ public class ThreadDemo1 {
 
 #### 2.3.3 Lock实现进程间通信
 
-```
+```java
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -437,9 +437,228 @@ public class ThreadDemo2 {
 }
 ```
 
+#### 2.3.4 线程间定制化启动
+
+- 启动要求
+
+  AA打印5次，BB打印10次，CC打印15次
+
+- 要求分析
+
+  **需要按照顺序**
+
+- 代码实践
+
+```java
+//第一步 创建资源类
+class ShareResource {
+    //定义标志位
+    private int flag = 1; //1 AA 2 BB 3 CC
+    // 创建Lock锁
+    private Lock lock = new ReentrantLock();
+    //  创建三个condition
+    private Condition c1 = lock.newCondition();
+    private Condition c2 = lock.newCondition();
+    private Condition c3 = lock.newCondition();
+    // 打印5次。参数第几轮
+    public void print5(int loop) throws InterruptedException{
+        //上锁
+        lock.lock();
+        try {
+            // 判断
+            while (flag != 1){
+                c1.await();
+            }
+            // 干活
+            for (int i = 0;i < 5 ;i++){
+                System.out.println(Thread.currentThread().getName()+"::"+loop);
+            }
+            // 通知
+            flag = 2 ;
+            c2.signal();
+        }finally {
+            //解锁操作 不然可能造成死锁
+            lock.unlock();
+        }
+    }
+
+    //打印10次,参数第几轮
+    public void print10(int loop) throws InterruptedException{
+        // 上锁
+        lock.lock();
+        try {
+            //判断
+            while (flag != 2){
+                c2.await();
+            }
+            // 干活
+            for (int i = 0;i < 10 ;i++){
+                System.out.println(Thread.currentThread().getName()+"::"+loop);
+            }
+            // 通知
+            flag = 3;
+            c3.signal();
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    //打印10次,参数第几轮
+    public void print15(int loop) throws InterruptedException{
+        // 上锁
+        lock.lock();
+        try {
+            //判断
+            while (flag != 3){
+                c3.await();
+            }
+            // 干活
+            for (int i = 0;i < 15 ;i++){
+                System.out.println(Thread.currentThread().getName()+"::"+loop);
+            }
+            // 通知
+            flag = 1;
+            c1.signal();
+        }finally {
+            lock.unlock();
+        }
+    }
+}
+public class ThreadDemo3 {
+    public static void main(String[] args) {
+        ShareResource shareResource = new ShareResource();
+        new Thread(()->{
+            for (int i = 1;i <= 10 ;i++){
+                try {
+                    shareResource.print5(i);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        },"AA").start();
+
+        new Thread(()->{
+            for (int i = 1;i <= 10 ;i++){
+                try {
+                    shareResource.print10(i);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        },"BB").start();
 
 
+        new Thread(()->{
+            for (int i = 1;i <= 10 ;i++){
+                try {
+                    shareResource.print15(i);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        },"CC").start();
+    }
+}
 
+```
+
+**当然按照一个condition也能够满足输出条件，但是通知的过程中可能出现多个进程争抢资源，而某个应得到资源的线程无法被唤醒的问题**
+
+#### 2.3.4 集合线程不安全问题的总结(以ArrayList作为参考)
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class ThreadDemo4 {
+    public static void main(String[] args) {
+        //创建ArrayList集合
+        List<String> list = new ArrayList<>();
+
+        for (int i = 0;i < 10;i++){
+            new Thread(()->{
+                //向集合中添加内容
+                list.add(UUID.randomUUID().toString().substring(0,8));
+                //从集合中获取内容
+                System.out.println(list);
+            },String.valueOf(i)).start();
+        }
+    }
+}
+```
+
+当你执行代码时，会报错**java.util.ConcurrentModificationException**,原因是你一边读取，一边向ArrayList对象中写入元素
+
+- 解决方法1：将ArrayList改成Vector对象
+
+**Vector对象能够是线程安全的原因是，Vector的方法是有synchronized关键字修饰，但是目前来说不建议这种方法，synchronized是重量级的效率较低**
+
+```java
+import java.util.List;
+import java.util.UUID;
+import java.util.Vector;
+
+public class ThreadDemo4 {
+    public static void main(String[] args) {
+        //创建Vector集合
+        List<String> list = new Vector<>();
+        for (int i = 0;i < 10;i++){
+            new Thread(()->{
+                //向集合中添加内容
+                list.add(UUID.randomUUID().toString().substring(0,8));
+                //从集合中获取内容
+                System.out.println(list);
+            },String.valueOf(i)).start();
+        }
+    }
+}
+```
+
+- 解决方法2:使用Collection.synchronized方法（也不常用）
+
+```java
+import java.util.*;
+
+public class ThreadDemo4 {
+    public static void main(String[] args) {
+        //Collections.synchronizedList的使用
+        List<String> list = Collections.synchronizedList(new ArrayList<>());
+        for (int i = 0;i < 10;i++){
+            new Thread(()->{
+                //向集合中添加内容
+                list.add(UUID.randomUUID().toString().substring(0,8));
+                //从集合中获取内容
+                System.out.println(list);
+            },String.valueOf(i)).start();
+        }
+    }
+}
+```
+
+- 解决方案3：CopyOnWriteArrayList
+
+```java
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class ThreadDemo4 {
+    public static void main(String[] args) {
+        // CopyOnWriteArrayList的使用
+        List<String> list = new CopyOnWriteArrayList<>();
+        for (int i = 0;i < 10;i++){
+            new Thread(()->{
+                //向集合中添加内容
+                list.add(UUID.randomUUID().toString().substring(0,8));
+                //从集合中获取内容
+                System.out.println(list);
+            },String.valueOf(i)).start();
+        }
+    }
+}
+```
+
+**CopyOnWriteArrayList读的时候支持并发读，当读并发的时候，当需要写的时候，需要将数据进行复制一遍，然后对这个副本独立写，写完了以后进行合并。简称读时共享，写时复制**
 
 
 

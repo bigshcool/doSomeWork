@@ -472,6 +472,13 @@ docker run -d -p 3306:3306 --privileged=true -v  /home/ubuntu/mysql/log:/var/log
 - 下载redis:6.0.8
 
 ```
+/*简单版*/
 docker run -d -p 6379:6379 redis:6.0.8
+```
+
+- 实现redis数据挂载
+
+```
+docker run -p 6379:6379 --name myr3 --privileged=true -v /app/redis/redis.conf:/etc/redis/redis.conf -v /app/redis/data:/data -d redis:6.0.8 redis-server /etc/redis/redis.conf
 ```
 
