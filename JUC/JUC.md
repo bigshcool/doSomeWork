@@ -564,7 +564,7 @@ public class ThreadDemo3 {
 
 **当然按照一个condition也能够满足输出条件，但是通知的过程中可能出现多个进程争抢资源，而某个应得到资源的线程无法被唤醒的问题**
 
-#### 2.3.4 集合线程不安全问题的总结(以ArrayList作为参考)
+#### 2.3.5 集合线程不安全问题的总结(以ArrayList作为参考)
 
 ```java
 import java.util.ArrayList;
@@ -659,6 +659,57 @@ public class ThreadDemo4 {
 ```
 
 **CopyOnWriteArrayList读的时候支持并发读，当读并发的时候，当需要写的时候，需要将数据进行复制一遍，然后对这个副本独立写，写完了以后进行合并。简称读时共享，写时复制**
+
+#### 2.3.6 HashSet线程不安全的问题总结
+
+- 解决方法1:CopyOnWriteArraySet
+
+```java
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+public class ThreadDemo4 {
+    public static void main(String[] args) {
+        // CopyOnWriteArrayList的使用
+        Set<String> set = new CopyOnWriteArraySet<>();
+        for (int i = 0;i < 10;i++){
+            new Thread(()->{
+                //向集合中添加内容
+                set.add(UUID.randomUUID().toString().substring(0,8));
+                //从集合中获取内容
+                System.out.println(set);
+            },String.valueOf(i)).start();
+        }
+    }
+}
+```
+
+#### 2.3.7 HashMap线程不安全的问题总结
+
+```java
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ThreadDemo4 {
+    public static void main(String[] args) {
+        // CopyOnWriteArrayList的使用
+        Map<String,String> map = new ConcurrentHashMap<>();
+        for (int i = 0;i < 10;i++){
+            String key = String.valueOf(i);
+            new Thread(()->{
+                //向集合中添加内容
+                map.put(key,UUID.randomUUID().toString().substring(0,8));
+                //从集合中获取内容
+                System.out.println(map);
+            },String.valueOf(i)).start();
+        }
+    }
+}
+```
+
+#### 2.3.8 可重入锁
+
+**synchronized(隐式)和Lock(显式)都是可重入锁**
 
 
 
