@@ -711,5 +711,128 @@ public class ThreadDemo4 {
 
 **synchronized(隐式)和Lock(显式)都是可重入锁**
 
+```
+public class ThreadDemo4 {
+    public static void main(String[] args) {
+        Object object = new Object();
+        new Thread(()->{
+            synchronized (object) {
+                System.out.println(Thread.currentThread().getName()+"外层");
+                synchronized (object){
+                    System.out.println(Thread.currentThread().getName()+"中层");
+                    synchronized (object){
+                        System.out.println(Thread.currentThread().getName()+"内层");
+                    }
+                }
+            }
 
+        },"t1").start();
+    }
+}
+```
+
+打印结果：
+
+外层
+
+中层
+
+内层
+
+**值得注意的是可重用锁指的是一个线程可以重复获取锁，但是如果两个线程，一个线程在没有释放锁的情况下，另外的一个线程则无法获取锁，将会卡住。**
+
+## 3.Callable
+
+创建线程多种方式
+
+第一种：继承Thread类
+
+第二种：实现Runnable
+
+第三种：Callable接口
+
+第四种：线程池方式
+
+- Runnable接口和Callable接口
+  - Callable有返回值，Ruunable无返回值
+  - Callable无法计算结果会抛出异常，Runnable不会抛出异常
+  - 实现方法名称不同，一个是run方法，一个是call方法
+
+```java
+class MyThread1 implements Runnable{
+    @Override
+    public void run(){
+
+    }
+}
+
+class MyThread2 implements Callable{
+    @Override
+    public Integer call() throws Exception{
+        return 200;
+    }
+}
+
+public class Demo1 {
+    public static void main(String[] args) {
+        new Thread(new MyThread1(),"AA").start();
+        // 报错
+        new Thread(new MyThread2(),"BB").start();
+    }
+}
+```
+
+**发现MyThread2（）的使用传参到Thread中是无法创建线程的，所以失败了，需要使用用FutureTask类**
+
+```java
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
+class MyThread1 implements Runnable{
+    @Override
+    public void run(){
+
+    }
+}
+
+class MyThread2 implements Callable{
+    @Override
+    public Integer call() throws Exception{
+        return 200;
+    }
+}
+
+
+public class Demo1 {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        new Thread(new MyThread1(),"AA").start();
+
+//        new Thread(new MyThread2(),"BB").start();
+        FutureTask<Integer> futureTask1 = new FutureTask<>(new MyThread2());
+        // Callable默认是函数式接口 可以使用lam表达式完成
+        FutureTask<Integer> futureTask2 = new FutureTask<>(()->{
+            System.out.println(Thread.currentThread().getName()+"COME IN CALLABLE");
+            return 1024;
+        });
+
+        // 创建一个线程
+        new Thread(futureTask2,"Luck").start();
+
+        while (!futureTask2.isDone()){
+            System.out.println("wait...");
+        }
+
+        // 获得返回call函数里面的值
+        System.out.println(futureTask2.get());
+
+        // 获得返回call函数里面的值,第二次不需要计算直接返回
+        System.out.println(futureTask2.get());
+
+        // 调用FutureTask的get方法
+        System.out.println(Thread.currentThread().getName()+ "come over");
+    }
+}
+
+```
 
