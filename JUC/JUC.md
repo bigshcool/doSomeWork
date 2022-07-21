@@ -836,3 +836,69 @@ public class Demo1 {
 
 ```
 
+## 4.辅助类
+
+### 4.1 减少计数CountDownLatch
+
+CountDownLatch可以设置一个计数器，然后通过countDown方法来进行减1的操作，使用await方法等待计数器不大于0，然后继续执行await方法以后的语句。
+
+- CountDownLatch主要有两个方法，当一个或者多个线程调用await方法时，这些线程会阻塞。
+- 其他线程调用countDown方法会将计数器减1(调用countDown方法的线程不会阻塞)
+- 当计数器的值变为0的时候，因await方法阻塞的线程会被唤醒，继续执行。
+
+```java
+public class CountDownLatchDemo {
+    public static void main(String[] args) throws InterruptedException {
+        //传入计数器的值
+        CountDownLatch countDownLatch = new CountDownLatch(6);
+        for (int i = 1; i <= 6;i++){
+            new Thread(()->{
+                System.out.println(Thread.currentThread().getName()+"号同学离开了");
+                //每次让计数器的值减一
+                countDownLatch.countDown();
+            },String.valueOf(i)).start();
+        }
+        //等待
+        countDownLatch.await();
+        System.out.println("班长关门走了");
+    }
+}
+```
+
+**采用CountDownLatch能有效的帮助主线程在子线程的运行以后开始运行。**
+
+### 4.2 循环栏删CyclicBarrier
+
+在使用中CyclicBarrier的构造方法第一个目标参数时目标障碍数，每次执行cyclicBarrier.await()以后，则相当于障碍数加一，当障碍数等于目标障碍数的时候，就会调用创建CyclicBarrier的参数Runable接口。
+
+```java
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+
+public class CyclicBarrierDemo {
+    private static final int NUMBER = 7;
+    public static void main(String[] args) {
+        // 创建CyclicBarrier
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(NUMBER,()->{
+            System.out.println("集齐了七颗龙珠");
+        });
+        // 创建七颗龙珠的过程
+        for (int i = 0;i <= 7;i++){
+            new Thread(()->{
+                System.out.println(Thread.currentThread().getName()+" 星龙珠被收集到了");
+                //等待方法
+                try {
+                    // 此线程进入等待队列
+                    cyclicBarrier.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (BrokenBarrierException e) {
+                    e.printStackTrace();
+                }
+            },String.valueOf(i)).start();
+        }
+    }
+}
+```
+
+### 4.3 信号灯Semaphone
