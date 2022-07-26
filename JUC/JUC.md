@@ -902,3 +902,35 @@ public class CyclicBarrierDemo {
 ```
 
 ### 4.3 信号灯Semaphone
+
+```java
+// 六个汽车 三个车位
+public class SemaphoreDemo {
+    public static void main(String[] args) {
+        // 创建Semaphore，设置条件许可
+        Semaphore semaphore = new Semaphore(3);
+        // 模拟六辆车
+        for (int i = 1 ; i <= 6;i++){
+            new Thread(()->{
+                try{
+                    // 抢占
+                    semaphore.acquire();
+
+                    System.out.println(Thread.currentThread().getName()+" 抢到车位");
+
+                    //设置停车时间
+                    TimeUnit.SECONDS.sleep(new Random().nextInt(5));
+
+                    System.out.println(Thread.currentThread().getName()+" 离开车位");
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }finally {
+                    // 释放
+                    semaphore.release();
+                }
+            },String.valueOf(i)).start();
+        }
+    }
+}
+```
+
