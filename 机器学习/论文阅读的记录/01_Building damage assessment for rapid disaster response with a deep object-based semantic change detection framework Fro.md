@@ -100,14 +100,46 @@
 
 ​		数据集来源:https://www.digitalglobe.com/ecosystem/open-data
 
+​		方法输入和输出如图。输入的是灾前和灾后双时图像。输出是一个表示建筑物位置的二进制掩码，和一个表示建筑物损坏程度的多类掩码。
+
+![](https://raw.githubusercontent.com/bigshcool/myPic/main/202209251702947.png)
+
 #### 4.2.1 损伤等级
 
-| Damage  level | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| Non-damage    | Undisturbed. No sign of water, structural or shingle damage or burn marks. |
-| Minor damage  | Building partially burnt, water surrounding structure, volcanic flow  nearby, roof elements missing, or visible cracks. |
-| Major damage  | Partial wall or roof collapse, encroaching volcanic flow or surrounded by water/mud. |
-| Destroyed     | Scorched, completely collapsed, partially/completely covered with water/mud, or otherwise no longer present. |
+| Damagelevel  | Description                                                  |
+| ------------ | ------------------------------------------------------------ |
+| Non-damage   | Undisturbed. No sign of water, structural or shingle damage or burn marks. |
+| Minor damage | Building partially burnt, water surrounding structure, volcanic flow  nearby, roof elements missing, or visible cracks. |
+| Major damage | Partial wall or roof collapse, encroaching volcanic flow or surrounded by water/mud. |
+| Destroyed    | Scorched, completely collapsed, partially/completely covered with water/mud, or otherwise no longer present. |
 
+#### 4.2.2 ChangeOS组成以及特点
 
+![](https://raw.githubusercontent.com/bigshcool/myPic/main/202209251709701.png)
+
+ChangeOS直接以双时图像为输入，输出实例级的建筑损伤评估结果，包括每个建筑的位置和损伤状态。部分编码器提取任务无关的深度特征，然后使用任务感知上下文编码器进一步提取任务感知上下文来增强深度特征。对于多任务预测，采用多任务解码器，实现多任务特征交互。
+
+- 组成部件
+
+  - partial Siamese encoder(部分孪生编码器)
+
+    ​        部分孪生体编码器是一个FCN模型，用于为下游任务提取与任务无关的深度特征。对于双时光学图像，我们引入了一种权值共享机制来重用网络结构及其权值，以缓解过拟合问题。
+
+    ​        这是由于灾前和灾后图像由相同的光学传感器采集，但处于不同的时间阶段，因此双时相图像属于相同的模态，具有相似的视觉模式。在这种情况下，两个独立的网络权重会产生巨大的冗余参数空间，阻碍网络训练。因此，共享权值可以显著降低参数空间的复杂性，缓解过拟合问题。
+
+  - task-aware contextual encoder(上下文编码器)
+
+    ​       对于不同的任务，需要从不同的范围捕获上下文信息。为此，我们提出了一个任务感知的上下文编码器，进一步提取任务感知的上下文信息，以获得任务感知和上下文增强的深层特征。任务感知上下文编码器由三个上样本块组成，对于建筑定位和损伤分类，网络架构相同，但权重不同。
+
+    ​		引入了横向连接，将具有较长范围上下文的高级特征图和具有更细空间细节的低级特征图结合起来。
+
+  - multi-task decoder(多任务译码器)
+
+    ​		为了进一步进行基于对象的分类，我们通过连接组件标记算法(Wu等人，2005年)将建筑定位任务从语义分割改进为实例分割，该算法输出一组对象多边形，但可以通过像素级损失函数进行监督。多任务解码器以四种比例尺的特征图为输入输出二值概率图表示建筑物的位置，多类概率图表示每个像素的损伤分类概率。这个多任务解码器由两个相同的子网络组成。
+
+  - object-based post-processing（基于对象的后处理器）
+
+    ​		**多任务解码器得到的建筑物定位和损伤分类都是像素级的分类结果，像素级表示总是导致部分损伤识别**。意味着建筑对象的所有像素在语义上应该是一致的，即为一个整体对象。
+
+  
 
