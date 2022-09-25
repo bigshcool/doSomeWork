@@ -97,3 +97,17 @@
 #### 4.2 本文方法
 
 ​		为了保证OBIA与深度学习的无缝集成，我们采用了一个FCN来生成更精确的建筑对象，以取代超像素分割，这个FCN还负责像素级的建筑定位。此外，ChangeOS通过使用部分Siamese FCN架构，将建筑定位和损伤分类集成到一个统一的框架中，从而实现特征表示级别的交互。
+
+​		数据集来源:https://www.digitalglobe.com/ecosystem/open-data
+
+#### 4.2.1 损伤等级
+
+| Damage  level | Description                                                  |
+| ------------- | ------------------------------------------------------------ |
+| Non-damage    | Undisturbed. No sign of water, structural or shingle damage or burn marks. |
+| Minor damage  | Building partially burnt, water surrounding structure, volcanic flow  nearby, roof elements missing, or visible cracks. |
+| Major damage  | Partial wall or roof collapse, encroaching volcanic flow or surrounded by water/mud. |
+| Destroyed     | Scorched, completely collapsed, partially/completely covered with water/mud, or otherwise no longer present. |
+
+
+
