@@ -113,20 +113,43 @@ void *memcpy(void *, const void *, uint);
 
 ### 4. 程序
 
+在User文件下，创建sleep.c
+
 ```c
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
 
-int main(int argc, char *argv[]){
-        if (argc != 2){
-                fprintf(2, "Usage: Sleep Num Seconds\n");
-                exit(1);
-        }
-        int seconds = atoi(argv[1]);
-        write(1, argv[1], sizeof(argv[1]));
-        sleep(seconds);
-        exit(0);
-}  
+int
+main(int argc, char *argv[])
+{
+
+  if (argc != 2){
+  	fprintf(2, "Usage: Sleep Num Seconds\n");
+    exit(1);
+  }
+
+  int sleep_sec = atoi(argv[1]);
+  sleep(sleep_sec);
+  exit(0);
+}
+
+
 ```
+
+## 5. 测试
+
+### 5.1 退出系统 
+
+输入ctrl + a 松开 再按一下x，退出xv6系统
+
+### 5.2 输入测试脚本
+
+```shell
+./grade-lab-util sleep
+```
+
+### 5.3 测试结果
+
+![image-20221119235045323](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20221119235045323.png)
 
