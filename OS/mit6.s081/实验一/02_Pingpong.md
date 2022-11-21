@@ -59,3 +59,14 @@ int main(int agrc, char *argv[]){
 }
 ```
 
+## 4. 测试
+
+输入
+
+```sh
+./grade-lab-util pingpong
+```
+
+结果
+
+![image-20221120000806709](C:\Users\99019\AppData\Roaming\Typora\typora-user-images\image-20221120000806709.png)
