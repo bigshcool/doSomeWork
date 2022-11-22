@@ -61,6 +61,9 @@ mysql -uroot -p
 ```mysql
 # 为了安全起见，修改一下密码
 set password for root@localhost = password("cugb123456");
+# 后期发现只输入上面命令会出现问题，需要补充下面命令，才能正确修改让JAVA连接
+set password for 'root'@'%'=password('12345678');
+flush privileges;
 ```
 
 ![image-20221121161250486](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20221121161250486.png)
@@ -80,3 +83,15 @@ set password for root@localhost = password("cugb123456");
 ![image-20221121161656976](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20221121161656976.png)
 
 查询下发现mymysql依然还在运行。
+
+## 10.MySQL的properties
+
+```properties
+jdbc.driverclass=com.mysql.jdbc.Driver
+jdbc.url=jdbc\:mysql\://101.43.138.50:3306/user_db?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+jdbc.username=root
+jdbc.password=cugb123456
+```
+
+
+
