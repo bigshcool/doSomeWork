@@ -88,9 +88,9 @@ flush privileges;
 
 ```properties
 jdbc.driverclass=com.mysql.jdbc.Driver
-jdbc.url=jdbc\:mysql\://101.43.138.50:3306/user_db?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+jdbc.url=jdbc\:mysql\://ip:3306/user_db?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
 jdbc.username=root
-jdbc.password=cugb123456
+jdbc.password=密码
 ```
 
 
