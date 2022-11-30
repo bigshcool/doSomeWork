@@ -6,6 +6,18 @@ public class Employee {
     private int age;
     private double salary;
 
+    public Employee() {
+    }
+
+    public Employee(int id) {
+        this.id = id;
+    }
+
+    public Employee(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public Employee(int id, String name, int age, double salary) {
         this.id = id;
         this.name = name;

@@ -112,8 +112,21 @@ public class Lambda03_MethodReferences {
         System.out.println(pre2.test("ab","abc"));
     }
 
-    // BigPredicate中的boolean test(T t1, T t2);
-    // String中的boolean t1.equals(t2)
+    // Function中的R apply(T t)
+    // Employee中的String GetName();
+    @Test
+    public void test7() {
+        Function<Employee, String> function = e -> e.getName();
 
+        Employee e = new Employee(10001,"马化腾",34,6000.38);
 
+        System.out.println(function.apply(e));;
+
+        System.out.println("**************************");
+
+        Function<Employee, String> function1 = Employee::getName;
+
+        System.out.println(function1.apply(e));
+
+    }
 }
