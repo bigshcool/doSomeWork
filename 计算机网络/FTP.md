@@ -301,9 +301,7 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
     包19：客户端（49206端口）PWD获取当前路径
 
-    包20：服务端（21端口）返回当前路径
-
-    ![image-20230314210324686](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210324686.png)
+    包20：服务端（21端口）返回当前路径![image-20230314210324686](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210324686.png)
 
 11.    包23：客户端（49206端口）向服务端请求建立被动连接
 
