@@ -275,21 +275,13 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
 ![image-20230314205611114](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314205611114.png)
 
-5. 报文7：客户端（49206端口）向服务端（21端口）发送request报文，command字段表示该报文里包含的是密码，arg字段为密码内容。
+5. 报文7：客户端（49206端口）向服务端（21端口）发送request报文，command字段表示该报文里包含的是密码，arg字段为密码内容。![image-20230314205648839](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314205648839.png)
 
-   ![image-20230314205648839](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314205648839.png)
+6. 报文8：服务端（21端口）回复response报文，code值为230，表示用户已登录，请继续操作![image-20230314205807770](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314205807770.png)
 
-6. 报文8：服务端（21端口）回复response报文，code值为230，表示用户已登录，请继续操作
+7. 报文9：客户端（49206端口）向服务端（21端口）发送SYST报文，表示返回服务器使用的操作系统。![image-20230314210051189](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210051189.png)
 
-   ![image-20230314205807770](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314205807770.png)
-
-7. 报文9：客户端（49206端口）向服务端（21端口）发送SYST报文，表示返回服务器使用的操作系统。
-
-![image-20230314210051189](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210051189.png)
-
-8. 报文10：服务端（21端口）回应系统类型，code字段为215，表示返回的是系统类型。arg字段为UNIX，表示系统类型是UNIX系统。
-
-![image-20230314210148390](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210148390.png)
+8. 报文10：服务端（21端口）回应系统类型，code字段为215，表示返回的是系统类型。arg字段为UNIX，表示系统类型是UNIX系统。![image-20230314210148390](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210148390.png)
 
 
 
@@ -299,9 +291,7 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
    包12：服务端（21端口）回应系统状态，code字段为211，arg字段为特征列表![image-20230314210237236](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210237236.png)
 
-10.   
-
-    包15：客户端（49206端口）PWD获取当前路径
+10.   包15：客户端（49206端口）PWD获取当前路径
 
     包16：服务端（21端口）返回当前路径
 
@@ -315,33 +305,20 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
     ![image-20230314210324686](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210324686.png)
 
-11.    
+11.    包23：客户端（49206端口）向服务端请求建立被动连接
 
-    包23：客户端（49206端口）向服务端请求建立被动连接
+    包24：服务端（21端口）响应，同意建立被动连接，并且向客户端发送服务端的IP和监听端口。![image-20230314210417035](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210417035.png)
 
-    包24：服务端（21端口）响应，同意建立被动连接，并且向客户端发送服务端的IP和监听端口。
+12.   包26-28：FTP子连接三次握手建立TCP连接。![image-20230314210505433](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210505433.png)
 
-    ![image-20230314210417035](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210417035.png)
+13.  包：32-33：服务端（20端口）向客户端（49207端口）发送数据。![image-20230314210811814](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210811814.png)
 
-12.   包26-28：FTP子连接三次握手建立TCP连接。
+14. 包：32-33：服务端（52564端口）向客户端（49207端口）发送数据。![image-20230314210858244](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210858244.png)
 
-    ![image-20230314210505433](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210505433.png)
+15. 包34-36：数据传输完成，TCP断开连接![image-20230314210943080](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210943080.png)
 
-13.  包：32-33：服务端（20端口）向客户端（49207端口）发送数据。
+16.   包59-62：控制连接已断开，TCP四次挥手断开TCP连接![image-20230314211021951](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314211021951.png)
 
-    ![image-20230314210811814](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210811814.png)
-
-14. 包：32-33：服务端（52564端口）向客户端（49207端口）发送数据。
-
-![image-20230314210858244](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210858244.png)
-
-15. 包34-36：数据传输完成，TCP断开连接
-
-    ![image-20230314210943080](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210943080.png)
-
-16.   包59-62：控制连接已断开，TCP四次挥手断开TCP连接
-
-     ![image-20230314211021951](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314211021951.png)
 
 ## 8. 思考
 
