@@ -323,35 +323,25 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
     ![image-20230314210417035](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210417035.png)
 
-12.   
-
-    包26-28：FTP子连接三次握手建立TCP连接。
+12.   包26-28：FTP子连接三次握手建立TCP连接。
 
     ![image-20230314210505433](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210505433.png)
 
-13.  
-
-    包：32-33：服务端（20端口）向客户端（49207端口）发送数据。
+13.  包：32-33：服务端（20端口）向客户端（49207端口）发送数据。
 
     ![image-20230314210811814](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210811814.png)
 
-14. 
-
-    包：32-33：服务端（52564端口）向客户端（49207端口）发送数据。
+14. 包：32-33：服务端（52564端口）向客户端（49207端口）发送数据。
 
 ![image-20230314210858244](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210858244.png)
 
-15. 
-
-    包34-36：数据传输完成，TCP断开连接
+15. 包34-36：数据传输完成，TCP断开连接
 
     ![image-20230314210943080](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210943080.png)
 
-16.   
+16.   包59-62：控制连接已断开，TCP四次挥手断开TCP连接
 
-     包59-62：控制连接已断开，TCP四次挥手断开TCP连接
-
-    ![image-20230314211021951](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314211021951.png)
+     ![image-20230314211021951](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314211021951.png)
 
 ## 8. 思考
 
