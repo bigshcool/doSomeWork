@@ -287,7 +287,7 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
 ![image-20230314210051189](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210051189.png)
 
-	8. 报文10：服务端（21端口）回应系统类型，code字段为215，表示返回的是系统类型。arg字段为UNIX，表示系统类型是UNIX系统。
+8. 报文10：服务端（21端口）回应系统类型，code字段为215，表示返回的是系统类型。arg字段为UNIX，表示系统类型是UNIX系统。
 
 ![image-20230314210148390](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210148390.png)
 
@@ -297,9 +297,7 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
    包11：客户端（49206端口）请求系统状态
 
-   包12：服务端（21端口）回应系统状态，code字段为211，arg字段为特征列表
-
-   ![image-20230314210237236](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210237236.png)
+   包12：服务端（21端口）回应系统状态，code字段为211，arg字段为特征列表![image-20230314210237236](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314210237236.png)
 
 10.   
 
