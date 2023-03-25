@@ -201,17 +201,11 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
 
 
- 9. ​    
+ 9.  包11：客户端（49203端口）请求系统状态
 
-    包11：客户端（49203端口）请求系统状态
+    包12：服务端（21端口）回应系统状态，code字段为211，arg字段为特征列表。![image-20230314195452372](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314195452372.png)    
 
-    包12：服务端（21端口）回应系统状态，code字段为211，arg字段为特征列表。
-
-    ![image-20230314195452372](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314195452372.png)
-
-	10. ​    
-
-     包15：客户端（49203端口）PWD获取当前路径
+    10. 包15：客户端（49203端口）PWD获取当前路径
 
      包16：服务端（21端口）返回当前路径
 
@@ -225,7 +219,7 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
      ![image-20230314195721027](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314195721027.png)
 
-	11.    
+    11.    
 
      包21：客户端（49203端口）请求使用ascii传输
 
@@ -233,7 +227,7 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
      ![image-20230314195824992](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314195824992.png)
 
-	12.   
+    12.   
 
      包23：客户端（49203端口）发起主动连接，向服务端发送建立子连接的IP和端口。
 
@@ -241,7 +235,7 @@ FTP的传输有两种方式：ASCII传输模式和二进制数据传输模式。
 
      ![image-20230314200037393](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314200037393.png)
 
-	13. 包26-28：FTP子连接三次握手建立TCP连接。
+    13. 包26-28：FTP子连接三次握手建立TCP连接。
 
 ![image-20230314204741030](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230314204741030.png)
 
