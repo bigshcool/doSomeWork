@@ -224,7 +224,7 @@ public synchronized int setValue(){
 | 当第二个操作为volatile写时,不论第一个操作是什么,都不能重排序。这个操作保证了volatile写之前的操作不会被重排到volatile写之后 |
 | 当第一个操作为volatile写时,第二个操作为volatile读时,不能重排 |
 
-### 2.2.3 volatile特性
+### 2.2. volatile特性
 
 - 保证可见性
 
@@ -354,12 +354,12 @@ public synchronized int setValue(){
       
     ```
       比如说你在计算的时候，别的线程已经提交了，所以你的计算直接失效了
-      ```
-      
+    ```
+    
       - **synchronized加了之后保证了串行执行，每次只有一个线程进来。**
-      
+    
       ![image-20230328154853830](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230328154853830.png)
-      
+    
       - **但volatile不能保证原子性，大家一起读，一起加一，就看谁提交的快了。提交快的直接让另一个失效。**
       
         ![image-20230328155058520](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230328155058520.png)
@@ -393,9 +393,13 @@ public synchronized int setValue(){
 
   重排序是指编译器和处理器为了优化程序性能而对指令序列进行重排序的一种手段，有时候会改变程序语句的先后顺序。
 
-  不存在数据依赖关系，可以重排序。
+  ```
+不存在数据依赖关系，可以重排序。
+  
+  ```
 
-  **存量数据依赖关系，禁止重排序。**
+存量数据依赖关系，禁止重排序。
+  ```
 
   数据依赖性 **：若两个操作访问同一变量，且这两个操作中有一个为写操作，此时两操作间就存在数据依赖性。**
 
@@ -406,14 +410,263 @@ public synchronized int setValue(){
   ![image-20230328163622877](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230328163622877.png)
 
   
-
+  
   1. 编译器优化的重排序:处理器不改变单线程串行语义的前提下，可以重新调整指令的执行顺序。
-  2. 指令级并行的重排序：处理器使用指令级并行技术来讲多条指令重叠执行，若不存在数据依赖性，处理器可以改变语句的对应的机器的执行顺序。
+2. 指令级并行的重排序：处理器使用指令级并行技术来讲多条指令重叠执行，若不存在数据依赖性，处理器可以改变语句的对应的机器的执行顺序。
   3. 内存系统的重排序：由于处理器使用缓存和读/写缓冲区，这使得加载和存储操作上看上去可能是乱序执行。
 
   **存在数据依赖关系，禁止重排序===> 重排序发生，会导致程序运行结果不同。**
-
-  编译器和处理器在重排序时，会遵守数据依赖性，不会改变存在依赖关系的两个操作的执行,但不同处理器和不同线程之间的数据性不会被编译器和处理器考虑，其只会作用于单处理器和单线程环境，下面三种情况，只要重排序两个操作的执行顺序，程序的执行结果就会被改变。
+  
+编译器和处理器在重排序时，会遵守数据依赖性，不会改变存在依赖关系的两个操作的执行,但不同处理器和不同线程之间的数据性不会被编译器和处理器考虑，其只会作用于单处理器和单线程环境，下面三种情况，**只要重排序两个操作的执行顺序，程序的执行结果就会被改变**。
   ![image-20230328164557228](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230328164557228.png)
+  
+  - Code
+  
+  ```java
+  class VolatileTest{
+      int i = 0;
+      volatile boolean flag = false;
+  
+      public void  write(){
+          i = 2;
+          flag = true;
+      }
+  
+      public void read(){
+          if (flag){
+              System.out.println("i = " + i);
+          }
+      }
+  }
+  ```
 
-  - 
+  - 写操作
+
+  ![image-20230331145906198](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230331145906198.png)
+
+  - 读操作
+  
+    ![image-20230331150210783](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230331150210783.png)
+
+- 日常使用
+
+  - 单一赋值可以，but含符合运算赋值不可以(i++之类)
+
+    ```
+    volatile int a = 10;
+    volatile boolean flag = false;
+    ```
+
+  - 状态标志，判断也是是否结束
+
+    ```java
+    /*
+    	使用:使用作为一个布尔值状态，用于知识发生了一个重要的一次性时间，例如完成初始化或者任务结束
+    	理由:状态标志并不依赖于程序内任何其他状态，且通常只有一种状态
+    	例子：任务是否结束
+    */
+    public class VolatileDemo3 {
+        private volatile static boolean flag = true;
+    
+        public static void main(String[] args) throws InterruptedException {
+            new Thread(()->{
+                while (flag){
+                    System.out.println("我的flag的值: " + flag);
+                }
+            },"t1").start();
+    
+            TimeUnit.SECONDS.sleep(2);
+            new Thread(()->{
+                flag = false;
+            },"t2").start();
+        }
+    }
+    ```
+
+  - 开销较低的读，写锁策略
+
+    ```
+    public class Counter{
+        private volatile int value;
+    	
+    	/*
+    		使用：当读远多于xie，解释使用内部锁和volatile变量来减少同步的开销
+    		理由：利用volatile保证读取操作的可见性，利用syncronized保证符合操作的原子性
+    	*/
+        public int getValue(){
+            return value;
+        }
+    
+        public synchronized int increment(){
+            return value++;
+        }
+    }
+    ```
+
+  - DCL双端锁的发布
+
+    - 问题实例
+
+      ```java
+      public class SafeDoubleCheckSingLeton {
+          private static SafeDoubleCheckSingLeton singleton;
+      
+          // 私有化的构造方法
+          private SafeDoubleCheckSingLeton(){
+      
+          }
+      
+          // 双重锁设计
+          public static SafeDoubleCheckSingLeton getInstance(){
+              if (singleton == null){
+                  // 1.多线程并发创建对象时，会通过加锁来保证只有一个线程创建对象
+                  synchronized (SafeDoubleCheckSingLeton.class){ // 1
+                      if (singleton == null){ // 2
+                          // 隐患：多线程环境下，由于重排序，该对象可能还未完成初始化就被其他线程读取
+                          // 当然创建线程时候由于synchronization会被阻塞掉
+                          // 但是仍然有可能由于指令重排，其他线程当singleton还没创建的时候就拿来使用。
+                          singleton = new SafeDoubleCheckSingLeton(); // 3
+                      }
+                  }
+              }
+              return singleton;
+          }
+      }
+      ```
+
+    - 单线程条件
+
+      单线程环境下(或者说正常情况下)，在“问题代码处”，会执行若下操作，保证能获取到自己初始化实例。
+
+      ``` 
+      memory = allocate() // 1.分类对象的内存空间
+      crorInstance(memory) //2.初始化
+      instance = memory() //3.设置instance指向分配的内存地址。
+      ```
+
+      
+
+    - 多线程环境下，在“问题代码处”，会执行如下操作，由于重排序导致2，3乱序，后续就是其他线程得到的是null而不是完成初始化的对象
+
+      - right
+
+        ```
+        memory = allocate() // 1.分类对象的内存空间
+        crorInstance(memory) //2.初始化
+        instance = memory() //3.设置instance指向分配的内存地址。
+        ```
+
+      - problem(重排序)
+
+        ```=
+        memory = allocate() // 1.分类对象的内存空间
+        instance = memory() //3.设置instance只想刚分配的内存地址。
+        crorInstance(memory) //2.初始化
+        ```
+
+      - 细节分析
+
+        其中第三步实例化Singleton分多步（分配内存空间，初始化对象，将对象指向分配的内存空间）,某些百年一起为了性能原因，会将第二步和第三步进行重排序（分配内存空间，将对象指向分配的内存空间，初始化对象）。这样，某个线程可能会获得一个未完成的实例。
+
+      - 解决方式
+
+        ```java
+        public class SafeDoubleCheckSingLeton {
+        	// 重点 ！！！ 通过volatile 实现线程安全的线程初始化
+            private volatile static SafeDoubleCheckSingLeton singleton;
+        
+            // 私有化的构造方法
+            private SafeDoubleCheckSingLeton(){
+        
+            }
+        
+            // 双重锁设计
+            public static SafeDoubleCheckSingLeton getInstance(){
+                if (singleton == null){
+                    // 1.多线程并发创建对象时，会通过加锁来保证只有一个线程创建对象
+                    synchronized (SafeDoubleCheckSingLeton.class){ // 1
+                        if (singleton == null){ // 2
+                            // 隐患：多线程环境下，由于重排序，该对象可能还未完成初始化就被其他线程读取
+                            // 当然创建线程时候由于synchronization会被阻塞掉
+                            // 但是仍然有可能由于指令重排，其他线程当singleton还没创建的时候就拿来使用。
+                            
+                            // 解决隐藏原理：利用volatile，禁止“初始化对象“(2)和"设置singleton"指向内存空间(3)重排序
+                            singleton = new SafeDoubleCheckSingLeton(); // 3
+                        }
+                    }
+                }
+                return singleton;
+            }
+        }
+        ```
+
+- 小总结
+
+  - volatile可见性
+
+  | volatile | 当对一个被volatile关键字修改的变量                           |
+  | -------- | ------------------------------------------------------------ |
+  | 1        | 写操作的话，这个变量的最新值会立即刷新回主内存               |
+  | 2        | 读操作的话，总是能够读取这个变量的最新值，也就是这个变量最后被修改的值 |
+  | 3        | 当某个线程收到通知，去读取volatile修饰的变量的值时候，线程私有工作内存数据失效，需要重新回到主内存去读取最新的数学。 |
+
+  - volatile没有原子性
+
+  - volatile禁止重排
+
+    - 写指令
+
+      ```java
+      StoreStore屏障
+      volatile
+      StoreLoad屏障
+      ```
+
+      - StoreStore屏障:
+
+        - 禁止上面的普通写和下面的volatile写操作重排序
+
+        - 前面所有的普通写操作，数据都已经刷新到主内存。
+        - 普通写和volatile写禁止重拍；volatile写和volatile写禁止重排
+
+      - StoreLoad屏障:
+        - 禁止上面的volatile写和下面的volatile读写或者普通写操作重排序
+        - 前面volatile写的操作，数据都已经刷新到主内存
+        - volatile写和普通写禁止重排序;volatile写和volatile读/写 禁止重排
+
+    - 读指令
+
+      ```
+      volatile 读操作
+      LoadLoad屏障
+      LoadStore屏障
+      ```
+
+      - LoadLoad屏障：
+        - 禁止下面的普通读，volatile读和上面的volatile读重排序
+        - volatile读和普通读禁止重排
+        - volatile读和volatile读禁止重排
+      - LoadStore屏障
+        - 禁止上面的volatile读和下面volatile写或者普通写重排序
+
+  - 当编写volatile关键字;系统底层如何加入内存屏障?
+
+    ![image-20230331233337520](https://raw.githubusercontent.com/bigshcool/myPic/main/image-20230331233337520.png)
+
+  - 内存屏障是什么？
+
+    是一种屏障指令，他使得CPU或者编译器对屏障指令前和后所发出的内存操作执行一个排序的约束，也叫内存栅栏或者栅栏指令。
+
+  - 内存屏障能干嘛？
+    - 阻止屏障两边的指令重排序
+    - 写数据时加入屏障，强制将线程私有工作内存的数据刷回主物理内存
+    - 写数据时加入屏障，线程私有工作内存的数据失效，重新到主内存内存中获取数据
+  - 内存屏障四大指令
+    - StoreStore
+    - StoreLoad
+    - LoadLoad
+    - LoadStore
+  - 一句话
+    - volatile写之前的操作，都禁止重排序到volatile以后
+    - volatile读以后的操作，都禁止重排序到volatile以前
+    - volatile写以后的volatile读，禁止重排序
